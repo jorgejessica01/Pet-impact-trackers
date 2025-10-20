@@ -20,17 +20,26 @@
 </head>
 <body class="bg-gray-50 p-4 sm:p-8">
 
+    <!-- SPINNER DE CARREGAMENTO (Adicionado no corpo para ser ocultado pelo JS) -->
+    <div id="loading-spinner" class="fixed inset-0 bg-white/70 backdrop-blur-sm z-50 flex items-center justify-center">
+        <svg class="animate-spin h-10 w-10 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </div>
+
     <header class="text-center mb-8">
         <h1 class="text-4xl font-extrabold text-gray-800 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mr-2 text-green-600"><path d="M3 6l3 3l3-3"/><path d="M12 20h9"/><path d="M16 4h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
             PET Impact Tracker
         </h1>
         <p class="text-lg text-gray-500 mt-2">Meça o Seu Impacto. Mude o Planeta.</p>
-        <p id="user-id-display" class="text-xs text-gray-400 mt-2">ID do Usuário: Carregando...</p>
+        <!-- ID do Usuário completo é importante para apps multiusuário -->
+        <p id="user-id-display" class="text-xs text-gray-400 mt-2 break-all">ID do Usuário: Carregando...</p>
     </header>
 
     <!-- Mensagens de Alerta -->
-    <div id="message-container" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6 shadow-md transition-opacity duration-500" role="alert">
+    <div id="message-container" class="hidden opacity-0 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6 shadow-md transition-opacity duration-500" role="alert">
         <p class="font-bold" id="message-title">Sucesso!</p>
         <p id="message-text"></p>
     </div>
@@ -43,21 +52,23 @@
         </h2>
 
         <div id="metrics-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <!-- Metric Card Template (will be populated by JS) -->
+            <!-- Unidades Usadas -->
             <div id="card-used" class="p-4 bg-white rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 transform hover:scale-[1.02] border-b-4 border-red-400">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mb-2 text-red-400"><path d="M3 6l3 3l3-3"/><path d="M12 20h9"/><path d="M16 4h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
                 <div id="used-count" class="text-3xl font-extrabold text-gray-800">0</div>
                 <div class="text-xs uppercase font-semibold text-gray-500 mt-1">Unidades Usadas</div>
             </div>
             
+            <!-- Unidades Recicladas -->
             <div id="card-recycled" class="p-4 bg-white rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 transform hover:scale-[1.02] border-b-4 border-blue-400">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mb-2 text-blue-400"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.7 2.75"/><path d="M3 3v6h6"/><path d="M3 13.5A9 9 0 0 0 12 21a9.75 9.75 0 0 0 6.7-2.75"/><path d="M21 21v-6h-6"/></svg>
                 <div id="recycled-count" class="text-3xl font-extrabold text-gray-800">0</div>
                 <div class="text-xs uppercase font-semibold text-gray-500 mt-1">Unidades Recicladas</div>
             </div>
 
-            <div id="card-balance" class="p-4 bg-white rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 transform hover:scale-[1.02] border-b-4 border-green-600">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mb-2 text-green-600"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+            <!-- Balanço Líquido (Cor será alterada pelo JS) -->
+            <div id="card-balance" class="p-4 bg-white rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 transform hover:scale-[1.02] border-b-4 border-blue-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mb-2 text-gray-600" id="balance-icon"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
                 <div id="balance-count" class="text-3xl font-extrabold text-gray-800">0</div>
                 <div class="text-xs uppercase font-semibold text-gray-500 mt-1">Balanço Líquido</div>
             </div>
@@ -112,7 +123,7 @@
                     <div
                         id="progress-bar-fill"
                         style="width: 0%;"
-                        class="h-full text-center text-xs text-white font-bold flex items-center justify-center"
+                        class="h-full text-center text-xs text-white font-bold flex items-center justify-center bg-yellow-500"
                     >
                         <span id="progress-percentage">0% Progresso</span>
                     </div>
@@ -140,13 +151,12 @@
         </div>
     </div>
 
-    <!-- SEÇÃO FINAL (Para o Tela Final do Vídeo) -->
+    <!-- SEÇÃO FINAL -->
     <footer class="mt-12 pt-8 border-t border-gray-200 text-center">
         <div class="bg-gray-100 p-6 rounded-xl shadow-inner">
             <h3 class="text-3xl font-extrabold text-green-700">Seu desafio começa agora!</h3>
             <p class="mt-2 text-xl text-gray-600">Faça download hoje.</p>
             <div class="mt-4 flex flex-col items-center justify-center">
-                <!-- QR Code Fictício/Link para Tela Final -->
                 <div class="w-32 h-32 bg-gray-300 rounded-lg flex items-center justify-center text-sm font-mono text-gray-500 border-4 border-dashed border-gray-400">
                     
                 </div>
@@ -157,11 +167,12 @@
 
     <!-- JavaScript & Firebase Logic -->
     <script type="module">
+        // Importações do Firebase: Certifique-se de que todos os módulos necessários estão presentes.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Variáveis Globais de Configuração ---
+        // --- Variáveis Globais de Configuração (Fornecidas pelo ambiente) ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -173,11 +184,15 @@
         let userId = null;
         let trackerData = { usedCount: 0, recycledCount: 0, goal: 100 };
         let isAuthReady = false;
+        
+        // Referências ao DOM
+        const loadingSpinner = document.getElementById('loading-spinner');
 
         // --- Funções de Utilidade ---
 
         const getTrackerDocRef = () => {
             if (!db || !userId) return null;
+            // Caminho de dados privados, como exigido: /artifacts/{appId}/users/{userId}/trackerData/current
             return doc(db, 'artifacts', appId, 'users', userId, 'trackerData', 'current');
         };
 
@@ -186,8 +201,10 @@
             const textEl = document.getElementById('message-text');
             const titleEl = document.getElementById('message-title');
             
-            container.classList.remove('hidden', 'bg-red-100', 'border-red-500', 'text-red-700', 'bg-green-100', 'border-green-500', 'text-green-700');
-            
+            // Remove classes existentes de estado e visibilidade
+            container.classList.remove('opacity-100', 'bg-red-100', 'border-red-500', 'text-red-700', 'bg-green-100', 'border-green-500', 'text-green-700');
+            container.classList.add('opacity-0'); // Garante que a transição ocorra
+
             if (isSuccess) {
                 container.classList.add('bg-green-100', 'border-green-500', 'text-green-700');
                 titleEl.textContent = "Sucesso!";
@@ -197,12 +214,20 @@
             }
             
             textEl.textContent = text;
+            container.classList.remove('hidden');
+
+            // Mostrar mensagem com transição
+            setTimeout(() => container.classList.add('opacity-100'), 10);
+
+            // Ocultar mensagem após 5 segundos
             setTimeout(() => {
-                container.classList.add('hidden');
+                container.classList.remove('opacity-100');
+                container.classList.add('opacity-0');
+                setTimeout(() => container.classList.add('hidden'), 500); // Esconde totalmente após a transição
             }, 5000);
         };
 
-        // --- Lógica de Renderização ---
+        // --- Lógica de Renderização (Atualiza a UI) ---
 
         const renderApp = () => {
             const { usedCount, recycledCount, goal } = trackerData;
@@ -213,10 +238,10 @@
             if (usedCount > 0) {
                 successRate = (recycledCount / usedCount) * 100;
             } else if (recycledCount > 0) {
-                successRate = 100;
+                successRate = 100; // Se reciclou mas não usou, 100% de sucesso
             }
             const successRateDisplay = successRate.toFixed(1);
-
+            
             let progressPercentage = 0;
             if (goal > 0) {
                 progressPercentage = Math.min(100, (recycledCount / goal) * 100);
@@ -230,6 +255,22 @@
             document.getElementById('recycled-count').textContent = recycledCount.toLocaleString();
             document.getElementById('balance-count').textContent = balanceCount.toLocaleString();
             
+            // ** Atualizar o Estilo do Card de Balanço **
+            const balanceCard = document.getElementById('card-balance');
+            balanceCard.classList.remove('border-red-400', 'border-green-600', 'border-blue-400');
+            balanceCard.querySelector('svg').classList.remove('text-red-400', 'text-green-600', 'text-blue-400', 'text-gray-600');
+
+            if (balanceCount > 0) {
+                balanceCard.classList.add('border-green-600');
+                balanceCard.querySelector('svg').classList.add('text-green-600');
+            } else if (balanceCount < 0) {
+                balanceCard.classList.add('border-red-400');
+                balanceCard.querySelector('svg').classList.add('text-red-400');
+            } else {
+                balanceCard.classList.add('border-blue-400');
+                balanceCard.querySelector('svg').classList.add('text-blue-400');
+            }
+
             // 2. Atualizar Impacto Real
             document.getElementById('kg-diverted').textContent = kgDiverted;
             document.getElementById('success-rate').textContent = successRateDisplay;
@@ -241,8 +282,15 @@
             const progressPercentageEl = document.getElementById('progress-percentage');
             
             progressBarFill.style.width = `${progressPercentage}%`;
-            progressBarFill.classList.remove('bg-yellow-500', 'bg-green-500');
-            progressBarFill.classList.add(progressPercentage < 50 ? 'bg-yellow-500' : 'bg-green-500');
+            progressBarFill.classList.remove('bg-yellow-500', 'bg-green-500', 'bg-red-500');
+
+            if (progressPercentage >= 100) {
+                progressBarFill.classList.add('bg-green-500');
+            } else if (progressPercentage > 50) {
+                progressBarFill.classList.add('bg-yellow-500');
+            } else {
+                progressBarFill.classList.add('bg-red-500');
+            }
             
             progressPercentageEl.textContent = `${progressPercentageDisplay}% Progresso`;
 
@@ -264,13 +312,18 @@
             }
 
             const docRef = getTrackerDocRef();
-            if (!docRef) return;
+            if (!docRef) {
+                console.error("Referência do documento indisponível.");
+                return;
+            }
 
             try {
+                // setDoc com merge: true para atualizar os campos sem apagar outros (como 'goal')
                 await setDoc(docRef, {
                     usedCount: newUsedCount,
                     recycledCount: newRecycledCount,
                 }, { merge: true });
+                displayMessage("Contador atualizado com sucesso!");
                 // onSnapshot cuidará da atualização da UI
             } catch (e) {
                 console.error("Erro ao atualizar o contador:", e);
@@ -288,7 +341,7 @@
             const newGoalValue = parseInt(goalInput, 10);
 
             if (isNaN(newGoalValue) || newGoalValue <= 0) {
-                displayMessage("A meta deve ser um número positivo.", false);
+                displayMessage("A meta deve ser um número inteiro positivo.", false);
                 return;
             }
 
@@ -296,6 +349,7 @@
             if (!docRef) return;
 
             try {
+                // Atualiza apenas o campo 'goal'
                 await setDoc(docRef, { goal: newGoalValue }, { merge: true });
                 displayMessage(`Meta atualizada para ${newGoalValue} unidades!`);
                 // onSnapshot cuidará da atualização da UI
@@ -311,19 +365,22 @@
             const docRef = getTrackerDocRef();
             if (!docRef) return;
 
+            // Escuta em tempo real as mudanças no documento do usuário
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
-                    trackerData = { ...trackerData, ...docSnap.data() };
+                    // Atualiza o estado local com os dados do Firestore, mantendo o goal inicial se for nulo no DB
+                    trackerData = { usedCount: 0, recycledCount: 0, goal: 100, ...docSnap.data() };
                 } else {
-                    // Inicializa o documento com dados padrão se não existir
-                    setDoc(docRef, trackerData, { merge: true }).catch(e => console.error("Erro ao inicializar:", e));
+                    // Inicializa o documento com dados padrão se não existir (primeiro acesso)
+                    setDoc(docRef, trackerData).catch(e => console.error("Erro ao inicializar:", e));
                 }
-                renderApp(); // Atualiza a interface do usuário
-                document.getElementById('loading-spinner').classList.add('hidden'); // Oculta spinner
+                
+                renderApp(); // Atualiza a interface do usuário com os novos dados
+                loadingSpinner.classList.add('hidden'); // Oculta o spinner após o primeiro carregamento
             }, (error) => {
-                console.error("Erro ao ouvir dados do Firestore (Permissão):", error);
-                displayMessage("Erro de permissão ou conexão com o banco de dados.", false);
-                document.getElementById('loading-spinner').classList.add('hidden');
+                console.error("Erro ao ouvir dados do Firestore:", error);
+                displayMessage("Erro de conexão com o banco de dados. Verifique o console.", false);
+                loadingSpinner.classList.add('hidden');
             });
         };
 
@@ -331,8 +388,9 @@
         
         const initApp = async () => {
             if (!firebaseConfig) {
-                console.error("Firebase config is missing.");
+                console.error("Firebase config está faltando.");
                 displayMessage("Erro: Configuração do Firebase ausente.", false);
+                loadingSpinner.classList.add('hidden');
                 return;
             }
 
@@ -341,22 +399,23 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                // Listener do estado de autenticação
+                // Listener do estado de autenticação: Define o userId e inicia a escuta em tempo real
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         userId = user.uid;
                         isAuthReady = true;
                         setupRealtimeListener();
                     } else {
-                        console.warn("Aguardando usuário autenticado (UID do Firebase)...");
+                        console.warn("Aguardando autenticação...");
                     }
                 });
 
-                // Tenta autenticar
+                // Tenta autenticar usando o token personalizado (se disponível) ou anonimamente
                 try {
                     if (initialAuthToken) {
                         await signInWithCustomToken(auth, initialAuthToken);
                     } else {
+                        // Se não houver token, autentica anonimamente
                         await signInAnonymously(auth);
                     }
                 } catch (error) {
@@ -367,33 +426,34 @@
             } catch (error) {
                 console.error("Erro na inicialização do Firebase:", error);
                 displayMessage("Erro na inicialização da aplicação.", false);
+                loadingSpinner.classList.add('hidden');
             }
         };
 
         const setupEventListeners = () => {
+            // Evento para "Usei PET"
             document.getElementById('btn-use-pet').addEventListener('click', () => {
                 if (isAuthReady) {
                     updateTracker(trackerData.usedCount + 1, trackerData.recycledCount);
                 } else {
-                    displayMessage("Aguarde o carregamento da aplicação.", false);
+                    displayMessage("Aguarde o carregamento da aplicação para registrar.", false);
                 }
             });
 
+            // Evento para "Reciclei PET"
             document.getElementById('btn-recycle-pet').addEventListener('click', () => {
                 if (isAuthReady) {
                     updateTracker(trackerData.usedCount, trackerData.recycledCount + 1);
                 } else {
-                    displayMessage("Aguarde o carregamento da aplicação.", false);
+                    displayMessage("Aguarde o carregamento da aplicação para registrar.", false);
                 }
             });
 
+            // Evento para salvar a meta
             document.getElementById('btn-save-goal').addEventListener('click', handleSaveGoal);
         };
         
-        // Colocando um spinner simples enquanto carrega
-        document.body.insertAdjacentHTML('afterbegin', '<div id="loading-spinner" class="fixed inset-0 bg-white/70 backdrop-blur-sm z-50 flex items-center justify-center"><svg class="animate-spin h-10 w-10 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>');
-
-
+        // Inicia a aplicação e configura os listeners após o carregamento total do DOM
         window.onload = function () {
             initApp();
             setupEventListeners();
