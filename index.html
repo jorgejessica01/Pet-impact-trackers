@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PET Impact Tracker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilo para a barra de progresso - animação suave */
+        #progress-bar-fill {
+            transition: width 0.7s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-4 sm:p-8">
+
+    <header class="text-center mb-8">
+        <h1 class="text-4xl font-extrabold text-gray-800 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mr-2 text-green-600"><path d="M3 6l3 3l3-3"/><path d="M12 20h9"/><path d="M16 4h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+            PET Impact Tracker
+        </h1>
+        <p class="text-lg text-gray-500 mt-2">Meça o Seu Impacto. Mude o Planeta.</p>
+        <p id="user-id-display" class="text-xs text-gray-400 mt-2">ID do Usuário: Carregando...</p>
+    </header>
+
+    <!-- Mensagens de Alerta -->
+    <div id="message-container" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6 shadow-md transition-opacity duration-500" role="alert">
+        <p class="font-bold" id="message-title">Sucesso!</p>
+        <p id="message-text"></p>
+    </div>
+
+    <!-- SECÇÃO 1: RASTREAMENTO E BALANÇO -->
+    <div class="bg-white p-6 rounded-2xl shadow-2xl mb-8 border-t-8 border-green-500">
+        <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2 text-green-500"><path d="M12 8V4H8"/><path d="M16 4h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+            Seu Balanço de PET
+        </h2>
+
+        <div id="metrics-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Metric Card Template (will be populated by JS) -->
+            <div id="card-used" class="p-4 bg-white rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 transform hover:scale-[1.02] border-b-4 border-red-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mb-2 text-red-400"><path d="M3 6l3 3l3-3"/><path d="M12 20h9"/><path d="M16 4h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+                <div id="used-count" class="text-3xl font-extrabold text-gray-800">0</div>
+                <div class="text-xs uppercase font-semibold text-gray-500 mt-1">Unidades Usadas</div>
+            </div>
+            
+            <div id="card-recycled" class="p-4 bg-white rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 transform hover:scale-[1.02] border-b-4 border-blue-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mb-2 text-blue-400"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.7 2.75"/><path d="M3 3v6h6"/><path d="M3 13.5A9 9 0 0 0 12 21a9.75 9.75 0 0 0 6.7-2.75"/><path d="M21 21v-6h-6"/></svg>
+                <div id="recycled-count" class="text-3xl font-extrabold text-gray-800">0</div>
+                <div class="text-xs uppercase font-semibold text-gray-500 mt-1">Unidades Recicladas</div>
+            </div>
+
+            <div id="card-balance" class="p-4 bg-white rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 transform hover:scale-[1.02] border-b-4 border-green-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mb-2 text-green-600"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                <div id="balance-count" class="text-3xl font-extrabold text-gray-800">0</div>
+                <div class="text-xs uppercase font-semibold text-gray-500 mt-1">Balanço Líquido</div>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button id="btn-use-pet" class="flex-1 px-6 py-3 text-lg font-semibold rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition-all duration-300 transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-red-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline w-5 h-5 mr-2"><path d="M3 6l3 3l3-3"/><path d="M12 20h9"/><path d="M16 4h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+                Usei PET (+1)
+            </button>
+            <button id="btn-recycle-pet" class="flex-1 px-6 py-3 text-lg font-semibold rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-blue-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline w-5 h-5 mr-2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.7 2.75"/><path d="M3 3v6h6"/><path d="M3 13.5A9 9 0 0 0 12 21a9.75 9.75 0 0 0 6.7-2.75"/><path d="M21 21v-6h-6"/></svg>
+                Reciclei PET (+1)
+            </button>
+        </div>
+    </div>
+
+    <!-- SECÇÃO 2: MÉTRICAS DE IMPACTO E META -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Métricas Reais -->
+        <div class="bg-white p-6 rounded-2xl shadow-2xl border-t-8 border-blue-500">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2 text-blue-500"><path d="M12 3v18"/><path d="M17 17v-4h-5v4h5z"/><path d="M7 17v-8h5v8H7z"/></svg>
+                Impacto Real
+            </h2>
+            <div class="space-y-4">
+                <!-- Kg Desviados -->
+                <div class="p-4 bg-white rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 transform hover:scale-[1.02] border-b-4 border-blue-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mb-2 text-blue-400"><path d="M12 3v18"/><path d="M17 17v-4h-5v4h5z"/><path d="M7 17v-8h5v8H7z"/></svg>
+                    <div id="kg-diverted" class="text-3xl font-extrabold text-gray-800">0.00</div>
+                    <div class="text-xs uppercase font-semibold text-gray-500 mt-1">Plástico Desviado (Kg)</div>
+                </div>
+                <!-- Taxa de Sucesso -->
+                <div class="p-4 bg-white rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 transform hover:scale-[1.02] border-b-4 border-green-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 mb-2 text-green-500"><path d="M17.5 19.5h-11a2 2 0 0 1-2-2v-12a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2z"/><path d="M7 11L10 14L17 7"/></svg>
+                    <div id="success-rate" class="text-3xl font-extrabold text-gray-800">0.0</div>
+                    <div class="text-xs uppercase font-semibold text-gray-500 mt-1">Taxa de Sucesso (%)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meta e Progresso -->
+        <div class="bg-white p-6 rounded-2xl shadow-2xl border-t-8 border-green-600">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2 text-green-600"><path d="M12 2v20"/><path d="M17 5H7"/><path d="M17 19H7"/><path d="M17 12H7"/></svg>
+                Seu Desafio: Meta
+            </h2>
+
+            <div class="mb-6">
+                <p class="text-sm font-semibold text-gray-600 mb-2">Meta Atual: <span id="current-goal-display" class="text-green-600 font-extrabold">100</span> Unidades Recicladas</p>
+                <div class="h-8 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                    <div
+                        id="progress-bar-fill"
+                        style="width: 0%;"
+                        class="h-full text-center text-xs text-white font-bold flex items-center justify-center"
+                    >
+                        <span id="progress-percentage">0% Progresso</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <input
+                    type="number"
+                    id="goal-input"
+                    value="100"
+                    placeholder="Definir Nova Meta"
+                    min="1"
+                    class="flex-1 p-3 border border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 transition-shadow"
+                    aria-label="Input para definir nova meta de reciclagem"
+                />
+                <button
+                    id="btn-save-goal"
+                    class="px-4 py-2 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-md focus:outline-none focus:ring-4 focus:ring-green-300"
+                    aria-label="Botão para salvar a nova meta"
+                >
+                    Salvar Meta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEÇÃO FINAL (Para o Tela Final do Vídeo) -->
+    <footer class="mt-12 pt-8 border-t border-gray-200 text-center">
+        <div class="bg-gray-100 p-6 rounded-xl shadow-inner">
+            <h3 class="text-3xl font-extrabold text-green-700">Seu desafio começa agora!</h3>
+            <p class="mt-2 text-xl text-gray-600">Faça download hoje.</p>
+            <div class="mt-4 flex flex-col items-center justify-center">
+                <!-- QR Code Fictício/Link para Tela Final -->
+                <div class="w-32 h-32 bg-gray-300 rounded-lg flex items-center justify-center text-sm font-mono text-gray-500 border-4 border-dashed border-gray-400">
+                    
+                </div>
+                <p class="mt-2 text-gray-700 font-semibold text-lg">PET Impact Tracker 🌎</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript & Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Variáveis Globais de Configuração ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const KG_PER_UNIT = 0.02; // 20g por unidade PET
+
+        // --- Estado e Instâncias do Firebase ---
+        let db = null;
+        let auth = null;
+        let userId = null;
+        let trackerData = { usedCount: 0, recycledCount: 0, goal: 100 };
+        let isAuthReady = false;
+
+        // --- Funções de Utilidade ---
+
+        const getTrackerDocRef = () => {
+            if (!db || !userId) return null;
+            return doc(db, 'artifacts', appId, 'users', userId, 'trackerData', 'current');
+        };
+
+        const displayMessage = (text, isSuccess = true) => {
+            const container = document.getElementById('message-container');
+            const textEl = document.getElementById('message-text');
+            const titleEl = document.getElementById('message-title');
+            
+            container.classList.remove('hidden', 'bg-red-100', 'border-red-500', 'text-red-700', 'bg-green-100', 'border-green-500', 'text-green-700');
+            
+            if (isSuccess) {
+                container.classList.add('bg-green-100', 'border-green-500', 'text-green-700');
+                titleEl.textContent = "Sucesso!";
+            } else {
+                container.classList.add('bg-red-100', 'border-red-500', 'text-red-700');
+                titleEl.textContent = "Erro!";
+            }
+            
+            textEl.textContent = text;
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 5000);
+        };
+
+        // --- Lógica de Renderização ---
+
+        const renderApp = () => {
+            const { usedCount, recycledCount, goal } = trackerData;
+
+            // Cálculos Derivados
+            const kgDiverted = (recycledCount * KG_PER_UNIT).toFixed(2);
+            let successRate = 0;
+            if (usedCount > 0) {
+                successRate = (recycledCount / usedCount) * 100;
+            } else if (recycledCount > 0) {
+                successRate = 100;
+            }
+            const successRateDisplay = successRate.toFixed(1);
+
+            let progressPercentage = 0;
+            if (goal > 0) {
+                progressPercentage = Math.min(100, (recycledCount / goal) * 100);
+            }
+            const progressPercentageDisplay = progressPercentage.toFixed(0);
+            
+            const balanceCount = recycledCount - usedCount;
+
+            // 1. Atualizar Balanço e Rastreamento
+            document.getElementById('used-count').textContent = usedCount.toLocaleString();
+            document.getElementById('recycled-count').textContent = recycledCount.toLocaleString();
+            document.getElementById('balance-count').textContent = balanceCount.toLocaleString();
+            
+            // 2. Atualizar Impacto Real
+            document.getElementById('kg-diverted').textContent = kgDiverted;
+            document.getElementById('success-rate').textContent = successRateDisplay;
+
+            // 3. Atualizar Meta e Progresso
+            document.getElementById('current-goal-display').textContent = goal.toLocaleString();
+            
+            const progressBarFill = document.getElementById('progress-bar-fill');
+            const progressPercentageEl = document.getElementById('progress-percentage');
+            
+            progressBarFill.style.width = `${progressPercentage}%`;
+            progressBarFill.classList.remove('bg-yellow-500', 'bg-green-500');
+            progressBarFill.classList.add(progressPercentage < 50 ? 'bg-yellow-500' : 'bg-green-500');
+            
+            progressPercentageEl.textContent = `${progressPercentageDisplay}% Progresso`;
+
+            // 4. Atualizar Input de Meta
+            document.getElementById('goal-input').value = goal;
+            
+            // 5. Atualizar ID do Usuário
+            if (userId) {
+                document.getElementById('user-id-display').textContent = `ID do Usuário: ${userId}`;
+            }
+        };
+
+        // --- Lógica do Firestore ---
+
+        const updateTracker = async (newUsedCount, newRecycledCount) => {
+            if (!isAuthReady) {
+                displayMessage("Aguarde o carregamento inicial da aplicação.", false);
+                return;
+            }
+
+            const docRef = getTrackerDocRef();
+            if (!docRef) return;
+
+            try {
+                await setDoc(docRef, {
+                    usedCount: newUsedCount,
+                    recycledCount: newRecycledCount,
+                }, { merge: true });
+                // onSnapshot cuidará da atualização da UI
+            } catch (e) {
+                console.error("Erro ao atualizar o contador:", e);
+                displayMessage("Erro ao salvar dados. Tente novamente.", false);
+            }
+        };
+
+        const handleSaveGoal = async () => {
+            if (!isAuthReady) {
+                displayMessage("Aguarde o carregamento inicial da aplicação.", false);
+                return;
+            }
+
+            const goalInput = document.getElementById('goal-input').value;
+            const newGoalValue = parseInt(goalInput, 10);
+
+            if (isNaN(newGoalValue) || newGoalValue <= 0) {
+                displayMessage("A meta deve ser um número positivo.", false);
+                return;
+            }
+
+            const docRef = getTrackerDocRef();
+            if (!docRef) return;
+
+            try {
+                await setDoc(docRef, { goal: newGoalValue }, { merge: true });
+                displayMessage(`Meta atualizada para ${newGoalValue} unidades!`);
+                // onSnapshot cuidará da atualização da UI
+            } catch (e) {
+                console.error("Erro ao salvar a meta:", e);
+                displayMessage("Erro ao salvar a meta. Tente novamente.", false);
+            }
+        };
+
+        const setupRealtimeListener = () => {
+            if (!db || !userId) return;
+
+            const docRef = getTrackerDocRef();
+            if (!docRef) return;
+
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    trackerData = { ...trackerData, ...docSnap.data() };
+                } else {
+                    // Inicializa o documento com dados padrão se não existir
+                    setDoc(docRef, trackerData, { merge: true }).catch(e => console.error("Erro ao inicializar:", e));
+                }
+                renderApp(); // Atualiza a interface do usuário
+                document.getElementById('loading-spinner').classList.add('hidden'); // Oculta spinner
+            }, (error) => {
+                console.error("Erro ao ouvir dados do Firestore (Permissão):", error);
+                displayMessage("Erro de permissão ou conexão com o banco de dados.", false);
+                document.getElementById('loading-spinner').classList.add('hidden');
+            });
+        };
+
+        // --- Inicialização e Event Listeners ---
+        
+        const initApp = async () => {
+            if (!firebaseConfig) {
+                console.error("Firebase config is missing.");
+                displayMessage("Erro: Configuração do Firebase ausente.", false);
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Listener do estado de autenticação
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        setupRealtimeListener();
+                    } else {
+                        console.warn("Aguardando usuário autenticado (UID do Firebase)...");
+                    }
+                });
+
+                // Tenta autenticar
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Erro na autenticação do Firebase:", error);
+                    displayMessage("Erro de autenticação. Tente recarregar.", false);
+                }
+
+            } catch (error) {
+                console.error("Erro na inicialização do Firebase:", error);
+                displayMessage("Erro na inicialização da aplicação.", false);
+            }
+        };
+
+        const setupEventListeners = () => {
+            document.getElementById('btn-use-pet').addEventListener('click', () => {
+                if (isAuthReady) {
+                    updateTracker(trackerData.usedCount + 1, trackerData.recycledCount);
+                } else {
+                    displayMessage("Aguarde o carregamento da aplicação.", false);
+                }
+            });
+
+            document.getElementById('btn-recycle-pet').addEventListener('click', () => {
+                if (isAuthReady) {
+                    updateTracker(trackerData.usedCount, trackerData.recycledCount + 1);
+                } else {
+                    displayMessage("Aguarde o carregamento da aplicação.", false);
+                }
+            });
+
+            document.getElementById('btn-save-goal').addEventListener('click', handleSaveGoal);
+        };
+        
+        // Colocando um spinner simples enquanto carrega
+        document.body.insertAdjacentHTML('afterbegin', '<div id="loading-spinner" class="fixed inset-0 bg-white/70 backdrop-blur-sm z-50 flex items-center justify-center"><svg class="animate-spin h-10 w-10 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>');
+
+
+        window.onload = function () {
+            initApp();
+            setupEventListeners();
+        };
+    </script>
+</body>
+</html>
